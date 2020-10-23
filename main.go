@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -69,13 +68,12 @@ func readKnownHosts(suffix string) []string {
 }
 
 func writeKnownHosts(suffix string, lines []string) {
-	if f, err := os.OpenFile(fmt.Sprint(os.Getenv("HOME"), "/.ssh/known_hosts", suffix), os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
+	if f, err := os.OpenFile(fmt.Sprint(os.Getenv("HOME"), "/.ssh/known_hosts", suffix), os.O_WRONLY|os.O_APPEND, 0644); err == nil {
 		defer f.Close()
-
-		writer := bufio.NewWriter(f)
+		f.Truncate(0)
 
 		for _, line := range lines {
-			writer.WriteString(fmt.Sprint(line, "\n"))
+			fmt.Fprintln(f, line)
 		}
 	}
 }
