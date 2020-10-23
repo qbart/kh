@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 
@@ -26,26 +27,26 @@ func main() {
 
 	// check diff
 	temp := make([]string, 0)
-	for _, t := range trusted {
+	for _, a := range active {
 		found := false
-		for _, a := range active {
+		for _, t := range trusted {
 			if t == a {
 				found = true
 				break
 			}
-			if !found {
-				temp = append(temp, t)
-			}
+		}
+		if !found {
+			temp = append(temp, a)
 		}
 	}
 
 	if len(temp) > 0 {
-		fmt.Print(ctc.ForegroundGreen, "No new hosts", ctc.Reset)
-	} else {
-		fmt.Println("New hosts:")
+		fmt.Print(ctc.ForegroundYellow, "New hosts (", len(temp), ")", ctc.Reset, "\n")
 		for _, s := range temp {
 			fmt.Println(s)
 		}
+	} else {
+		fmt.Print(ctc.ForegroundGreen, "No new hosts\n", ctc.Reset)
 	}
 }
 
@@ -54,15 +55,12 @@ func readKnownHosts(suffix string) []string {
 	if f, err := os.Open(fmt.Sprint(os.Getenv("HOME"), "/.ssh/known_hosts", suffix)); err == nil {
 		defer f.Close()
 
-		reader := bufio.NewReader(f)
-
-		for {
-			line, err := reader.ReadString('\n')
-			line = strings.TrimSuffix(line, "\n")
-			res = append(res, line)
-
-			if err != nil {
-				break
+		b, err := ioutil.ReadAll(f)
+		if err == nil {
+			for _, s := range strings.Split(string(b), "\n") {
+				if strings.TrimSpace(s) != "" {
+					res = append(res, s)
+				}
 			}
 		}
 	}
