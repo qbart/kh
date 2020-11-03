@@ -18,7 +18,7 @@ func main() {
 	trusted := readKnownHosts(".db")
 	active := readKnownHosts("")
 
-	if flag.Arg(0) == "reset" {
+	if flag.Arg(0) == "r" {
 		writeKnownHosts("", trusted)
 		fmt.Printf("%s%d hosts written%s\n", ctc.ForegroundGreen, len(trusted), ctc.Reset)
 		return
